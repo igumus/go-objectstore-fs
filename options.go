@@ -15,21 +15,14 @@ const _defBucket = "store"
 // _defDataDir handles the default data directory
 const _defDataDir = "/data"
 
-// _defSeperatorLength handles the default for _envSeperatorLength env variable value
-const _defSeperatorLength = 2
-
-// _objectFormat handles directory naming of objects
-const _objFormat = "%s/%s/objects/%s/%s/%s"
-
 // Captures/Represents file system based objectstore configuration information
 type fsObjectStoreConfig struct {
-	dir             string
-	bucket          string
-	seperatorLength int
-	debug           bool
+	dir    string
+	bucket string
+	debug  bool
 }
 
-// validate returns error if constructed configuration not valid, otherwise returns nil
+// validate - returns error if constructed configuration not valid, otherwise returns nil
 func (f *fsObjectStoreConfig) validate() error {
 	if len(f.dir) == 0 {
 		return ErrDataDirNotSpecified
@@ -45,10 +38,9 @@ func (f *fsObjectStoreConfig) validate() error {
 // with its default  values
 func defaultFSObjectstoreConfig() *fsObjectStoreConfig {
 	return &fsObjectStoreConfig{
-		dir:             _defDataDir,
-		bucket:          _defBucket,
-		seperatorLength: _defSeperatorLength,
-		debug:           _defDebug,
+		dir:    _defDataDir,
+		bucket: _defBucket,
+		debug:  _defDebug,
 	}
 }
 
