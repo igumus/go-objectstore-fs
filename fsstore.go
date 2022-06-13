@@ -99,15 +99,12 @@ func (f *fsObjectStoreService) CreateObject(ctx context.Context, reader io.Reade
 	}
 	return cid, nil
 }
-
-func (f *fsObjectStoreService) ListObject(ctx context.Context) (<-chan string, <-chan error) {
+func (f *fsObjectStoreService) ListObject(ctx context.Context) <-chan objectstore.ListObjectEvent {
 	dir := fmt.Sprintf("%s/%s", f.dataDir, f.bucket)
-	chData := make(chan string)
-	chErr := make(chan error, 1)
+	ch := make(chan objectstore.ListObjectEvent)
 
 	go func() {
-		defer close(chErr)
-		defer close(chData)
+		defer close(ch)
 
 		err := filepath.Walk(dir,
 			func(path string, info os.FileInfo, err error) error {
@@ -118,15 +115,44 @@ func (f *fsObjectStoreService) ListObject(ctx context.Context) (<-chan string, <
 					return err
 				}
 				if info.Mode().IsRegular() {
-					chData <- info.Name()
+					ch <- objectstore.ListObjectEvent{Object: info.Name(), Error: nil}
 				}
 				return nil
 			})
 		if err != nil {
-			chErr <- err
+			ch <- objectstore.ListObjectEvent{Object: "", Error: err}
 			return
 		}
 	}()
-
-	return chData, chErr
+	return ch
 }
+
+// func (f *fsObjectStoreService) ListObject(ctx context.Context) (<-chan string, <-chan error) {
+// 	chData := make(chan string)
+// 	chErr := make(chan error, 1)
+
+// 	go func() {
+// 		defer close(chErr)
+// 		defer close(chData)
+
+// 		err := filepath.Walk(dir,
+// 			func(path string, info os.FileInfo, err error) error {
+// 				if ctx.Err() != nil {
+// 					return ctx.Err()
+// 				}
+// 				if err != nil {
+// 					return err
+// 				}
+// 				if info.Mode().IsRegular() {
+// 					chData <- info.Name()
+// 				}
+// 				return nil
+// 			})
+// 		if err != nil {
+// 			chErr <- err
+// 			return
+// 		}
+// 	}()
+
+// 	return chData, chErr
+// }

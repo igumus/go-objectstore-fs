@@ -1,2 +1,4 @@
 github.com/igumus/go-objectstore-lib v1.0.1 h1:6UOWJm1RvTn9kUo74RgNKfT9KlVru0KktaUTgI+RTAc=
 github.com/igumus/go-objectstore-lib v1.0.1/go.mod h1:y0r9zPzsVeTjX3tXlfkIYHejmYK5Xnzg8hDBKlVsO4Y=
+github.com/igumus/go-objectstore-lib v1.0.2 h1:CF7Ak6iPHbQN8ZaBBh9Ty2FsCxUlOn+zu2ruhRj5/54=
+github.com/igumus/go-objectstore-lib v1.0.2/go.mod h1:y0r9zPzsVeTjX3tXlfkIYHejmYK5Xnzg8hDBKlVsO4Y=
