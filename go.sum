@@ -1,5 +1,5 @@
-github.com/igumus/go-objectstore-lib v1.1.0 h1:i1fjY4eZwAxtU/NE0E9781b+7Ly4k+jR9YocvhOkZVA=
-github.com/igumus/go-objectstore-lib v1.1.0/go.mod h1:vCxP1nWV8e6K68XjY7H3RaF7zd+cSWrzyR4X++j2c3Q=
+github.com/igumus/go-objectstore-lib v1.1.2 h1:pB1kS+lUlgE6rRu16mRR3wPuFA4B1b63cV8cVbye0a8=
+github.com/igumus/go-objectstore-lib v1.1.2/go.mod h1:vCxP1nWV8e6K68XjY7H3RaF7zd+cSWrzyR4X++j2c3Q=
 github.com/ipfs/go-cid v0.2.0 h1:01JTiihFq9en9Vz0lc0VDWvZe/uBonGpzo4THP0vcQ0=
 github.com/ipfs/go-cid v0.2.0/go.mod h1:P+HXFDF4CVhaVayiEb4wkAy7zBHxBwsJyt0Y5U6MLro=
 github.com/klauspost/cpuid/v2 v2.0.4/go.mod h1:FInQzS24/EEf25PyTYn52gqo7WaD8xa0213Md/qVLRg=

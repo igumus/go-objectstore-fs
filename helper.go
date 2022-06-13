@@ -56,12 +56,12 @@ func read(objLink string) ([]byte, error) {
 	return binData.Bytes(), nil
 }
 
-func write(cid, objLink string, data []byte) (string, error) {
+func write(objLink string, data []byte) error {
 	os.MkdirAll(filepath.Dir(objLink), 0777)
 	file, err := os.Create(objLink)
 	if err != nil {
 		log.Printf("err: creating object failed: %s, %v\n", objLink, err)
-		return cid, objectstore.ErrObjectWritingFailed
+		return objectstore.ErrObjectWritingFailed
 	}
 
 	binData := bytes.Buffer{}
@@ -70,7 +70,7 @@ func write(cid, objLink string, data []byte) (string, error) {
 	_, err = binData.WriteTo(file)
 	if err != nil {
 		log.Printf("err: writing object failed: %s, %v\n", objLink, err)
-		return cid, objectstore.ErrObjectWritingFailed
+		return objectstore.ErrObjectWritingFailed
 	}
-	return cid, nil
+	return nil
 }

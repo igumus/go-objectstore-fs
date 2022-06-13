@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 
 	"github.com/igumus/go-objectstore-lib"
+	"github.com/ipfs/go-cid"
 )
 
 // ErrDataDigestionFailed is return, when file system objectstore's object digestion failed.
@@ -55,8 +56,8 @@ func (f *fsObjectStoreService) path(objLink string) string {
 }
 
 // HasObject - checks whether object exists on file system with specified cid (aka content identifier)
-func (f *fsObjectStoreService) HasObject(ctx context.Context, cid string) bool {
-	objLink := f.path(objectstore.DefaultLinkFunc(cid))
+func (f *fsObjectStoreService) HasObject(ctx context.Context, cid cid.Cid) bool {
+	objLink := f.path(objectstore.DefaultLinkFunc(cid.String()))
 	ret := exists(objLink)
 	if f.debug {
 		log.Printf("debug: has object: %s, %t\n", objLink, ret)
@@ -65,11 +66,11 @@ func (f *fsObjectStoreService) HasObject(ctx context.Context, cid string) bool {
 }
 
 // ReadObject - reads object on file system with specified cid (aka content identifier)
-func (f *fsObjectStoreService) ReadObject(ctx context.Context, cid string) ([]byte, error) {
+func (f *fsObjectStoreService) ReadObject(ctx context.Context, cid cid.Cid) ([]byte, error) {
 	if !f.HasObject(ctx, cid) {
 		return nil, objectstore.ErrObjectNotExists
 	}
-	objLink := f.path(objectstore.DefaultLinkFunc(cid))
+	objLink := f.path(objectstore.DefaultLinkFunc(cid.String()))
 	if f.debug {
 		log.Printf("debug: check object existence: %s\n", objLink)
 	}
@@ -83,28 +84,30 @@ func (f *fsObjectStoreService) ReadObject(ctx context.Context, cid string) ([]by
 }
 
 // CreateObject - creates object to file system with specified data (aka content)
-func (f *fsObjectStoreService) CreateObject(ctx context.Context, reader io.Reader) (string, error) {
+func (f *fsObjectStoreService) CreateObject(ctx context.Context, reader io.Reader) (cid.Cid, error) {
 	data, readerErr := ioutil.ReadAll(reader)
 	if readerErr != nil {
-		return "", readerErr
+		return cid.Undef, readerErr
 	}
 
 	digest, err := objectstore.DigestPrefix.Sum(data)
 	if err != nil {
 		log.Printf("err: digesting object failed: %s\n", err.Error())
-		return "", ErrDataDigestionFailed
+		return cid.Undef, ErrDataDigestionFailed
 	}
-	cid := digest.String()
 	if f.debug {
-		log.Printf("debug: created object cid: %s\n", cid)
+		log.Printf("debug: created object cid: %s\n", digest)
 	}
-	if !f.HasObject(ctx, cid) {
-		objLink := f.path(objectstore.DefaultLinkFunc(cid))
-		return write(cid, objLink, data)
-	} else if f.debug {
-		log.Printf("debug: skip writing already exists object: %s\n", cid)
+
+	if f.HasObject(ctx, digest) {
+		return digest, nil
 	}
-	return cid, nil
+
+	objLink := f.path(objectstore.DefaultLinkFunc(digest.String()))
+	if err := write(objLink, data); err != nil {
+		return digest, err
+	}
+	return digest, nil
 }
 
 func (f *fsObjectStoreService) ListObject(ctx context.Context) <-chan objectstore.ListObjectEvent {
