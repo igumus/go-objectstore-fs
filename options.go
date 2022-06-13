@@ -1,10 +1,14 @@
 package fsstore
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/igumus/go-objectstore-lib"
 )
+
+// ErrDataDirNotSpecified is return, when file system objectstore's data directory not specified.
+var ErrDataDirNotSpecified = errors.New("fsobjectstore: data directory parameter not specified")
 
 // _defDebug handles the default for debug mode
 const _defDebug = false
