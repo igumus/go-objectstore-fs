@@ -2,6 +2,7 @@ package fsstore
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"io"
 	"io/ioutil"
@@ -11,6 +12,9 @@ import (
 
 	"github.com/igumus/go-objectstore-lib"
 )
+
+// ErrDataDigestionFailed is return, when file system objectstore's object digestion failed.
+var ErrDataDigestionFailed = errors.New("fsobjectstore: object digestion failed")
 
 // Captures/Represents filesystem backed objectstore service information
 type fsObjectStoreService struct {
@@ -84,10 +88,13 @@ func (f *fsObjectStoreService) CreateObject(ctx context.Context, reader io.Reade
 	if readerErr != nil {
 		return "", readerErr
 	}
-	cid := objectstore.DefaultDigestFunc(data)
-	if err := checkContextError(ctx, f.debug); err != nil {
-		return cid, err
+
+	digest, err := objectstore.DigestPrefix.Sum(data)
+	if err != nil {
+		log.Printf("err: digesting object failed: %s\n", err.Error())
+		return "", ErrDataDigestionFailed
 	}
+	cid := digest.String()
 	if f.debug {
 		log.Printf("debug: created object cid: %s\n", cid)
 	}
@@ -99,6 +106,7 @@ func (f *fsObjectStoreService) CreateObject(ctx context.Context, reader io.Reade
 	}
 	return cid, nil
 }
+
 func (f *fsObjectStoreService) ListObject(ctx context.Context) <-chan objectstore.ListObjectEvent {
 	dir := fmt.Sprintf("%s/%s", f.dataDir, f.bucket)
 	ch := make(chan objectstore.ListObjectEvent)
@@ -126,33 +134,3 @@ func (f *fsObjectStoreService) ListObject(ctx context.Context) <-chan objectstor
 	}()
 	return ch
 }
-
-// func (f *fsObjectStoreService) ListObject(ctx context.Context) (<-chan string, <-chan error) {
-// 	chData := make(chan string)
-// 	chErr := make(chan error, 1)
-
-// 	go func() {
-// 		defer close(chErr)
-// 		defer close(chData)
-
-// 		err := filepath.Walk(dir,
-// 			func(path string, info os.FileInfo, err error) error {
-// 				if ctx.Err() != nil {
-// 					return ctx.Err()
-// 				}
-// 				if err != nil {
-// 					return err
-// 				}
-// 				if info.Mode().IsRegular() {
-// 					chData <- info.Name()
-// 				}
-// 				return nil
-// 			})
-// 		if err != nil {
-// 			chErr <- err
-// 			return
-// 		}
-// 	}()
-
-// 	return chData, chErr
-// }
